@@ -15,8 +15,8 @@ ACCESS_SECRET = 'BvSz95GWagY3fT2TCLBxaL5ChFXlFDO2s1ZmJgWCt6VgE'
 auth = tweepy.OAuthHandler(CONSUMER_KET, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 
-C = ['是', '好']
-E = ['is', 'good']
+C = ['是', '的']
+E = ['is', 'of']
 Q = ' OR '.join(list(map(lambda x: '(' + ' '.join(x) + ')', itertools.product(C, E))))
 LIST_OWNER = 'dark_chenshifei'
 LIST_NAME = 'bilingual'
@@ -31,18 +31,24 @@ def search_tweets_with_keyword(keyword):
         keyword,
         result_type='recent',
         count=200,
-        lang='zh').items(200 * 10)
+        lang='zh').items(200 * 5)
     return result
 
 def crawl_user_tweets(username):
     if not username in CRAWLED_USERS:
-        result = api.user_timeline(username, count=200)
         CRAWLED_USERS.append(username)
+        result = []
+        try:
+            result = api.user_timeline(username, count=200)
+        except tweepy.TweepError as exp:
+            print('Error when cralwing ', username)
+            print(exp)
         return result
 
-def get_list_member_ids(owner_screen_name, list_name):
-    users = api.list_members(list_name, owner_screen_name)
-    result = map(lambda x: x.id, users)
+def get_list_members(owner_screen_name, list_name):
+    result = tweepy.Cursor(
+        api.list_members, slug=list_name, 
+        owner_screen_name=owner_screen_name).items()
     return result
 
 def add_member_to_list(member_id, owner_screen_name, list_name):
@@ -54,14 +60,19 @@ def remove_member_from_list(member_id, owner_screen_name, list_name):
 if __name__ == "__main__":
     candidates = search_tweets_with_keyword(Q)
     for tweet in candidates:
+    # candidates = get_list_members(LIST_OWNER, LIST_NAME)
+    # for user in candidates:
         screen_name = tweet.user.screen_name
+        # screen_name = user.screen_name
         user_tweets = crawl_user_tweets(screen_name)
         if user_tweets:
-            print('Identifying ' + screen_name, end='...')
+            print('Identifying ' + screen_name + ' ...', end='')
             tl_langs = TimelimeLangs(user_tweets, tweet.user.id)
+            # tl_langs = TimelimeLangs(user_tweets, user.id)
             if tl_langs.is_bilingual_user():
                 print('bilingual ratio = {}, overall ratio = {}'.format(
                     tl_langs.bilingual_ratio, tl_langs.overall_ratio))
-                # add_member_to_list(tweet.user.id, LIST_OWNER, LIST_NAME)
+                add_member_to_list(tweet.user.id, LIST_OWNER, LIST_NAME)
             else:
                 print('no')
+                # remove_member_from_list(user.id, LIST_OWNER, LIST_NAME)

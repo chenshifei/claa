@@ -1,10 +1,13 @@
 import itertools
 import logging
-from polyglot.detect import Detector
+import cld3
+import preprocessor as p
 
-BILINGUAL_RATIO = 0.2
-MIN_OVERALL_RATIO = 0.7
-MIN_LANG_CONFIDENCE = 30
+MIN_BILINGUAL_RATIO = 0.5
+MIN_OVERALL_PROP = 0.8
+MIN_LANG_CONFIDENCE = 0.3
+MIN_INTWEET_PROP = 0.3
+MIN_LEN = 100
 
 LANG_ID_1 = 'en'
 LANG_ID_2 = 'zh'
@@ -22,12 +25,7 @@ class TimelimeLangs:
 
     def detect(self, tweets):
         for tweet in tweets:
-            tweet_langs = []
-            detector = Detector(tweet.text, quiet=True)
-            for lang in detector.languages:
-                if lang.confidence > MIN_LANG_CONFIDENCE:
-                    tweet_langs.append(lang.code[:2])
-            self._meta_langs.append(tweet_langs)
+            self._detect_tweet(tweet)
 
         self.langs = list(itertools.chain(*self._meta_langs))
 
@@ -39,8 +37,20 @@ class TimelimeLangs:
         if self.langs:
             self.overall_ratio = (num_lang1 + num_lang2) / len(self.langs)
 
+    def _detect_tweet(self, tweet):
+        if hasattr(tweet, "retweeted_status"):
+            return
+        tweet_langs = []
+        clean_text = p.clean(tweet.text)
+        candidates = cld3.get_frequent_languages(clean_text, num_langs=3)
+        for lang in candidates:
+            if lang.probability > MIN_LANG_CONFIDENCE and lang.proportion > MIN_INTWEET_PROP:
+                tweet_langs.append(lang.language[:2])
+        self._meta_langs.append(tweet_langs)
+
     def is_bilingual_user(self):
-        if self.bilingual_ratio > BILINGUAL_RATIO and \
-            self.overall_ratio > MIN_OVERALL_RATIO:
+        if self.bilingual_ratio > MIN_BILINGUAL_RATIO and \
+            self.overall_ratio > MIN_OVERALL_PROP and \
+            len(self._meta_langs) > MIN_LEN:
             return True
         return False
