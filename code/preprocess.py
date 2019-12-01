@@ -1,3 +1,4 @@
+import csv
 import pandas as pd
 from opencc import OpenCC
 import preprocessor as p
@@ -33,4 +34,4 @@ df = df.drop(to_remove)
 
 df = df.reset_index(drop=True)
 
-df.to_csv('../data/tweets.csv')
+df.to_csv('../data/tweets.csv', quoting=csv.QUOTE_NONNUMERIC)
