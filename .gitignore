@@ -1,6 +1,9 @@
 data/
 proposal/
 references/
+code/.data
+code/.vector_cache
+code/*.pt
 
 # Created by https://www.gitignore.io/api/latex,macos,python,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=latex,macos,python,visualstudiocode

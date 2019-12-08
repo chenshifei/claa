@@ -39,12 +39,15 @@ def translate(text, src='zh-tw', dest='en'):
 
 df = pd.read_csv('../data/tweets.csv')
 
-df['translated_eng'] = df['chn_text'].dropna().apply(translate)
-print('-----------')
-print('Translate ENG successful!, shape={}'.format(df.shape))
+# chn_texts = df['chn_text'].dropna().drop_duplicates()
+# df['translated_eng'] = chn_texts.apply(translate)
+# print('-----------')
+# print('Translate ENG successful!, shape={}'.format(df.shape))
+# df.to_csv('../data/tweets_translated_eng.csv', quoting=csv.QUOTE_NONNUMERIC)
 
-df['translated_chn'] = df['eng_text'].dropna().apply(translate, src='en', dest='zh-tw')
+eng_texts = df['eng_text'].dropna().drop_duplicates(keep='last')
+df['translated_chn'] = eng_texts.apply(translate, src='en', dest='zh-tw')
 print('-----------')
 print('Translate CHN successful!, shape={}'.format(df.shape))
 
-df.to_csv('../data/tweets_translated.csv', quoting=csv.QUOTE_NONNUMERIC)
+df.to_csv('../data/tweets_translated_chn.csv', quoting=csv.QUOTE_NONNUMERIC)
