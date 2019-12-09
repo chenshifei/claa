@@ -1,0 +1,205 @@
+% File tacl2018v2.tex
+% Sep 20, 2018
+
+% The English content of this file was modified from various *ACL instructions
+% by Lillian Lee and Kristina Toutanova
+%
+% LaTeXery is mostly all adapted from acl2018.sty.
+
+\documentclass[11pt,a4paper]{article}
+\usepackage{times,latexsym}
+\usepackage{url}
+\usepackage{CJKutf8}
+\usepackage{amsmath}
+\usepackage[T1]{fontenc}
+
+%% Package options:
+%% Short version: "hyperref" and "submission" are the defaults.
+%% More verbose version:
+%% Most compact command to produce a submission version with hyperref enabled
+%%    \usepackage[]{tacl2018v2}
+%% Most compact command to produce a "camera-ready" version
+%%    \usepackage[acceptedWithA]{tacl2018v2}
+%% Most compact command to produce a double-spaced copy-editor's version
+%%    \usepackage[acceptedWithA,copyedit]{tacl2018v2}
+%
+%% If you need to disable hyperref in any of the above settings (see Section
+%% "LaTeX files") in the TACL instructions), add ",nohyperref" in the square
+%% brackets. (The comma is a delimiter in case there are multiple options specified.)
+
+\usepackage[]{tacl2018v2}
+
+
+
+
+%%%% Material in this block is specific to generating TACL instructions
+\usepackage{xspace,mfirstuc,tabulary}
+\newcommand{\dateOfLastUpdate}{Sept. 20, 2018}
+\newcommand{\styleFileVersion}{tacl2018v2}
+
+\newcommand{\ex}[1]{{\sf #1}}
+
+\newif\iftaclinstructions
+\taclinstructionsfalse % AUTHORS: do NOT set this to true
+\iftaclinstructions
+\renewcommand{\confidential}{}
+\renewcommand{\anonsubtext}{(No author info supplied here, for consistency with
+TACL-submission anonymization requirements)}
+\newcommand{\instr}
+\fi
+
+%
+\iftaclpubformat % this "if" is set by the choice of options
+\newcommand{\taclpaper}{final version\xspace}
+\newcommand{\taclpapers}{final versions\xspace}
+\newcommand{\Taclpaper}{Final version\xspace}
+\newcommand{\Taclpapers}{Final versions\xspace}
+\newcommand{\TaclPapers}{Final Versions\xspace}
+\else
+\newcommand{\taclpaper}{submission\xspace}
+\newcommand{\taclpapers}{{\taclpaper}s\xspace}
+\newcommand{\Taclpaper}{Submission\xspace}
+\newcommand{\Taclpapers}{{\Taclpaper}s\xspace}
+\newcommand{\TaclPapers}{Submissions\xspace}
+\fi
+
+%%%% End TACL-instructions-specific macro block
+%%%%
+
+\title{Bilingual Tweets Authorship Attribution}
+
+% Author information does not appear in the pdf unless the "acceptedWithA" option is given
+% See tacl2018v2.sty for other ways to format author information
+\author{
+ Shifei Chen \\
+ Department of Linguistics and Philology/Uppsala University, Sweden \\
+  {\sf Shifei.Chen.2701@student.uu.se} \\
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+  This document contains the formatting requirements for TACL \taclpapers. These
+  formatting rules take effect for all \taclpapers received from September 2, 2018
+  onwards.
+\end{abstract}
+
+\section{Introduction}
+In recent years, political propaganda has moved a significant amount of resources onto the social media in additional to the tranditional mass media, which has created both positive and negative effects in the crowd. Since then, there has been many researches on applying NLP techniques to counter-attack the manufactured information published on the social media. Most of them analyzed stylometric features on mono-language data and showed promising potential in this field such as \citet{rocha2016authorship}.
+
+In June 2019, the proposed anti-extradition law in Hong Kong had attracted great controversy on the social media. Political propoganda also had played a big role in this movement. In fact, it was so severe that Twitter had to suspend about 1000 twitter accounts violating their platform manipulation policies\footnote{\url{https://blog.twitter.com/en_us/topics/company/2019/information_operations_directed_at_Hong_Kong.html}}. A brief study by \citet{wood_mcminn_feng_2019} had revealed that the languages used in these tweets contents spaned across several languages (but mostly in Chinese and English), which proposed challenges for cross-langauge authorship attribution on short social media texts.
+
+Unlike the authorship attribution in English social network texts, cross-language authorship attribution has not been discovered extensively yet. However as propoganda now reaching out more people around the world by using multiple language, there is the need to develop authorship attribution techniques for cross-language social media texts. In this project, I have decided to try the possibilities for bilingual authorship attribution --- focuing on English and Chinese, by applying both machine translation and aligned word embeddings. 
+
+\section{Methodology}
+\subsection{Dataset}
+
+To my best knowledge there is currently no publicly available corpus focused in social media texts in both English and Chinese, hence I have decided to build my own using Twitter Public API.
+
+\begin{CJK*}{UTF8}{gbsn}
+
+\begin{table}[t]
+  \begin{center}
+  \begin{tabular}{|l|l|}
+  \hline \bf Chinese & \bf English \\ \hline
+  是 & am, is, are \\
+  的 & of \\
+  有 & have, has \\
+  在 & at, in, on \\
+  \hline
+  \end{tabular}
+  \end{center}
+  \caption{\label{tab:query-func-words-table} Function words used in the query string}
+\end{table}
+
+The first step is to build a query string to collect as many tweets in either English or Chinese as possible. I selected several frequent function words in Chinese and their English counter parts, as shown in Table \ref{tab:query-func-words-table}.  Let's say $C=\{c_1, c_2, c_3, \cdots, c_i\}$ is a group of Chinese function words and $E=\{e_1, e_2, e_3, \cdots, e_j\}$ is their English siblings, the query string $Q$ would be union set over the Cartesian product $C\times E$.
+
+\begin{equation}
+  Q=\bigcup_{k=1}s_k, s_k \in C \times E
+\end{equation}
+
+For example if we select the first row in the table, then our Chinese cadidate function word is ``是'' while the English candidates are ``am'', ``is'' and ``are''. Our query string would be \verb|(是 am) OR (是 is) OR (是 are)|.
+
+\end{CJK*}
+
+The next step is to fine grain all of the possible twitter users from the previous step. Here I define two bilingual ratio values --- let $L_1$ and $L_2$ denote two sets of the tweets in a certain language by a user, then we have $R_{inner}$ as the ratio between these two tweets languages.
+
+\begin{equation}
+  R_{inner} = \frac{min(|L_1|, |L_2|)}{max(|L_1|, |L_2|)}
+\end{equation}
+
+And $R_{overall}$ as the ratio between the bilingual content and the total tweets.
+
+\begin{equation}
+  R_{overall} = \frac{|L_1|+|L_2|}{\text{|All tweets|}}
+\end{equation}
+
+For each user, I crawled his or her first 200 tweets from his timeline (exclude retweets) and set the threshold at $R_{inner} \ge 0.5$ and $R_{overall} \ge 0.8$. In this way I could filter out two kinds of users --- someone who occasionally tweets in another language than his/her main language, and someone who tweets in all kinds of languages.
+
+After these two steps I have selected 52 valid bilingual twitter accounts. Two of them are obviously non-personnal users so I have removed them from the list, which made the length of the final list of bilingual twitter users to 50. From them I crawled all of their tweets and applied cleaning to these data (including removing URLs, hashtags, mentions, reserved words, emojis and smileys). The CNN classifier cannot take tweets that are shorter then 5 words so I have also segmented both English and Chinese tweets and removed those that are not longer than 5 segments. In the end, I have obtained 69710 tweets that are detailed as below in Table \ref{tab:dist-dataset-table}. Also, each model is trained and validated in fixed training and validataion dataset, derived from the full dataset. The ratio for dividing the training, validation and test subset are 0.7, 0.1 and 0.2, respectively.
+
+\begin{table*}[t]
+  \begin{center}
+  \begin{tabular}{|l|r|r|r|r|}
+  \hline \bf & \# of tweets & \bf length of raw tweets & \bf length of CHN tweets & \bf length of ENG tweets \\ \hline
+  mean & 1383.4 & 100.309 & 37.664 & 72.59 \\
+  std & 1211.126 & 38.24 & 29.142 & 31.04  \\
+  min & 102 & 5 & 5 & 6 \\
+  25\% & 334.5 & 68 & 16 & 47 \\
+  50\% & 856 & 109 & 27 & 74 \\
+  74\% & 2306.75 & 140 & 51 & 100 \\
+  max & 4195 & 159 & 140 & 146 \\
+  \hline
+  \end{tabular}
+  \end{center}
+  \caption{\label{tab:dist-dataset-table} Distribution of the dataset}
+\end{table*}
+
+\subsection{Vanilla Model}
+
+As \citet{rocha2016authorship} had showned in their work, the best stylometric features for authorship attribution on social media text are word-level and char-level n-grams. I have designed a vanilla attribution model with word-level 1, 2, 3-grams and char-level 1, 2, 3-grams, which is then feeded into a logistic regression classifier and a LIBLINEAR\cite{REF08a} SVM classifier implemented by Scikit-learn \cite{scikit-learn}. The word-level and char-level features are calculated from all available tweets without distinguishing the language. I have also transformed all of the appearance counts to TF-IDF values to deminish the effect of trending words.
+
+We have seen from Table \ref{tab:dist-dataset-table} that the number of tweets from each user is highly unbalanced. The most frequent user tweets 40 times more than the most quiet user. So I have set both of the logistic regression and LIBLINEAR SVM to balance out the dataset automatically by assigning more weight to minor classes (users).
+
+\subsection{Machine Translation Model}
+
+Inspired by \citet{bogdanova2014cross} I have adapted to tackle the cross-langauge authorship attribution problem is by using machine translation. I have used the Translator Text API from Microsoft Azure Cognitive Services. The state-of-art machine translation service is far from perfect and underperforms on social media text than formal writings. In order words it will inevitably introduce ``distortion'' to the raw tweet and worsen the result in theory, I still argue that machine translation is one of the cheapest and the most intuitive solution to multi-language tasks in NLP.
+
+In this second authorship attribution model, I have extracted and divided the raw tweets into the English group and the Chinese group. For tweets that mix both languages I seperated them into these two monolingual groups. Then tweets in each language group will be machine translated into the other language before being feeded into the aforementioned logistic regression and SVM classifier, together with other translated tweets within the same group.
+
+\subsection{CNN Model}
+
+The last model I have applied is a Convolutional Neural Network classifier inspired by \citet{shrestha2017convolutional}. They have proposed an architecture using char n-gram models as the single embedding layer to deal with tweets classification. But since my task is to explore the classification problem between two languages, I have switched to the aligned fasttext word embeddings \cite{bojanowski2017enriching} \cite{joulin2018loss} as my embedding layer.
+
+In the aligned fasttext word embeddings, each word is represented by a 300 dimension vector. I concatenated two embeddings to form a bunch of 600 dimension word embeddings for the possible bilingual vocabularies, padded them and send them to the next layer. Each OOV words are marked as \verb|<UNK>| and are giving an embedding of zeros.
+
+The CNN network also has four convolutional layers, each of them has 100 kernels sizing from 2, 3, 4 or 5. They are designed to catch the information hidden inside the word bigram. trigram and quadgrams before being max-pooled. I have adapted Adam optimizer \cite{kingma2014adam} and all of the hyperparams are shown in Table \ref{tab:cnn-hyperparams-table}.
+
+\begin{table}[t]
+  \begin{center}
+  \begin{tabular}{|l|l|}
+  \hline \bf Hyperparameters & \bf Value \\ \hline
+  \# of embedding layers & 1 \\
+  \hspace{0.5cm} dimension & 600 \\
+  \# of convolutional layers & 3 \\
+  \hspace{0.5cm} kernel size & [2, 3, 4, 5] \\
+  \hspace{0.5cm} \# of kernels & 100/layer \\
+  \hspace{0.5cm} pooling & max \\
+  Dropout & 0.5 \\
+  Learning rate & 0.001 \\
+  Max epochs & 10 \\
+  Batch size & 32 \\
+  \hline
+  \end{tabular}
+  \end{center}
+  \caption{\label{tab:cnn-hyperparams-table} Hyperparameter settings in the CNN model}
+\end{table}
+
+\bibliography{report}
+\bibliographystyle{acl_natbib}
+
+\end{document}
+
+
