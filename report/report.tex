@@ -81,9 +81,7 @@ TACL-submission anonymization requirements)}
 \begin{document}
 \maketitle
 \begin{abstract}
-  This document contains the formatting requirements for TACL \taclpapers. These
-  formatting rules take effect for all \taclpapers received from September 2, 2018
-  onwards.
+  This document attempted to tackle the authorship attribution problem across different languages. Focusing on Chinese and English, I have examined the possibilities of three attribution models, especially an aligned word embeddings model. The final result showed that even though it didn't surpass the other two models, there is possibility for the aligned embedding model to solve the cross-language authorship attribution problem.
 \end{abstract}
 
 \section{Introduction}
@@ -91,11 +89,19 @@ In recent years, political propaganda has moved a significant amount of resource
 
 In June 2019, the proposed anti-extradition law in Hong Kong had attracted great controversy on the social media. Political propoganda also had played a big role in this movement. In fact, it was so severe that Twitter had to suspend about 1000 twitter accounts violating their platform manipulation policies\footnote{\url{https://blog.twitter.com/en_us/topics/company/2019/information_operations_directed_at_Hong_Kong.html}}. A brief study by \citet{wood_mcminn_feng_2019} had revealed that the languages used in these tweets contents spaned across several languages (but mostly in Chinese and English), which proposed challenges for cross-langauge authorship attribution on short social media texts.
 
-Unlike the authorship attribution in English social network texts, cross-language authorship attribution has not been discovered extensively yet. However as propoganda now reaching out more people around the world by using multiple language, there is the need to develop authorship attribution techniques for cross-language social media texts. In this project, I have decided to try the possibilities for bilingual authorship attribution --- focuing on English and Chinese, by applying both machine translation and aligned word embeddings. 
+Unlike the authorship attribution in English social network texts, cross-language authorship attribution has not been discovered extensively yet. However as propoganda now reaching out more people around the world by using multiple language, there is the need to develop authorship attribution techniques for cross-language social media texts. In this project, I have decided to try the possibilities for bilingual authorship attribution --- focuing on English and Chinese, by applying both machine translation and aligned word embeddings.
 
-\section{Related Works}
+The rest of the paper are structured in this way. Section \ref{sec:related-work} descirbes related works in cross-langauge authorship attribution and general authorship attribution problems. Section \ref{sec:method} explains how the dataset is built as well as the three model I have tried, while Section \ref{sec:results} showed and evaluated the corrsponding results. Finally in Section \ref{sec:conclusion} I summarizes the whole project and looked at possible futhre works for cross-language authorship attribution.
 
-\section{Methodology}
+\section{Related Works}\label{sec:related-work}
+
+Compared to authorship attribution on monolingual languages, cross-language authorship attribution has not been explored so much. \citet{bogdanova2014cross} explored the possbility of applying machine translation to connect two languages, in combination of tranditional stylometric features such as word-level and char-level n-grams. But there are also researches attempted to tackle the problem without bridging different languages by their semantics at all, such as \citet{llorens2016deep} and \citet{sarwar2018scalable} who both analyzed low level language independent features.
+
+However, in all these previous works, the language used in their datasets are all Indo-European Lanuages. In my case, the relationship between Chinese and English are much further. There are research done for distant langauge pairs in cross-language plagiarm detection \cite{barron2010plagiarism}, but to my best knowledge no similar work for cross-lanauge authorship attribution has been released.
+
+Besides datasets, most authorship attribution tasks employed machine learning techniques as the classification algorithm, while there are few examples successfully applied neural networks to the same problem \cite{shrestha2017convolutional}. This is reasonable as monolingual authorship attribution usually catches the quirkiness of spelling, spacing, word richness of a specific writer. While in cross-language authorship attribution, especially for distant language pairs, there might be no directly comparable features betwenn languages. For example in Chinese and English, it is impossible to compare the pattern of misspealling and spacing in Chinese because of the unique writing system in Chinese. Therefore we might need to go back to the semantic level to look for similarities across different writings to find out if they came from the same author.
+
+\section{Methodology}\label{sec:method}
 
 \subsection{Dataset}
 
@@ -213,7 +219,7 @@ The CNN network also has four convolutional layers, each of them has 100 kernels
   \caption{\label{tab:cnn-hyperparams-table} Hyperparameter settings in the Aligned Word Embeddings model}
 \end{table}
 
-\section{Results}
+\section{Results}\label{sec:results}
 
 \subsection{Best Features}
 
@@ -235,7 +241,7 @@ The CNN network also has four convolutional layers, each of them has 100 kernels
 
 For the first two models I have applied grid search to find the best stylometric feature for biligual authorship attribution. As shown in Table \ref{tab:stylo-feature-results-table}, the best feature are usually the shorter word unigrams or bigrams for each classifier. Only in the translated Chinese group the best results appeared in the char-level bigrams and trigrams. But this can be explained by the fact that in Chinese the average word length is about one to two characters while in English it is about four to five letters.  \cite{chen2015does} \cite{bochkarev2015average}. In other words, Chinese characters them alone can carry as much information as English words. The result that word-level n-grams are more effective than char-level is inline with results from other previous work in many other authorship attribution tasks \cite{kestemont2018overview} \cite{rangel2019overview}.
 
-Also the SVM classifier outperformed the logistic regression classifier in nearly all comparisions, except in the char-level unigram one. This can be seen in \citet{rocha2016authorship}'s work as well as they attributed it to the application of Maxiumn Margin Princple in SVM classifiers. However for authorship attributuon task on long articles, logistic regression could be better than SVM \cite{bogdanova2014cross}. Thus I think SVM is better suited for short social media texts than logistic regression.
+Also the SVM classifier outperformed the logistic regression classifier in nearly all comparisions, except in the char-level unigram one. This can be seen in \citet{rocha2016authorship}'s work as well as they attributed it to the application of Maxiumn Margin Princple in SVM classifiers. However for authorship attribution task on long articles, logistic regression could be better than SVM \cite{bogdanova2014cross}. Thus I think SVM is better suited for short social media texts than logistic regression.
 
 \subsection{Distortion from Machine Translation}
 
@@ -265,7 +271,11 @@ The aligned word embeddings model didn't surpass my vanilla model, however it is
 
 The result for the aligned word embeddings model might suggest a better combination for bilingual word embeddings rather than concatenation. But there are other facts that could also affect the final result. First, the fastText word embeddings were trained on a domian that is far away from social media text. Wikipedia is more formal, serious and comprehensive place than Twitter, and the topics it includes had little intersection with the topic from Tiwtter. The results could be improved by training a dedicated word embeddings from Twitter corpus. Another things to note is the imbalance between English and Chinese word embedding sizes. The English embeddings has 2519370 items and is 7.5 times larger than the Chinese embeddings, just as the English Wikipedia articles are around 5 times more than articles in Chinese \footnote{As Dec 2018, \url{https://stats.wikimedia.org/EN/TablesWikipediaEN.htm}} \footnote{As Dec 2018, \url{https://stats.wikimedia.org/EN/TablesWikipediaZH.htm}}. Smaller embeddings size will introduce more OOV words and will lower the overall accuracy.
 
-\section{Conclusion}
+\section{Conclusion}\label{sec:conclusion}
+
+In this project I have explored the possibilities of three different model for a bilingual authorship attribution question. On a dataset collected from Twitter, the simple SVM classifier with word-level and char-level n-grams achieved the highest accuracy, followed by the aligned word embeddings model. Moreover I have also discussed the distortion brought by machine translation. It turned out that even though the aligned word embeddings didn't give the best result, it has the potential to be one of the solutions to the cross-lanaguage authorship attribution problem as well.
+
+In futher works, the emphisis should be on a more sophiscated assembling of bilignual word embeddings. Also, world clusters is another promising way to transfer from one languages to another. Either of them avoids the inevitable distortion from machine translation, hence can be the new features for cross-language authorship attribution.
 
 \bibliography{report}
 \bibliographystyle{acl_natbib}
