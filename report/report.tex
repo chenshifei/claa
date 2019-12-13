@@ -11,6 +11,9 @@
 \usepackage{url}
 \usepackage{CJKutf8}
 \usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{adjustbox}
 \usepackage[T1]{fontenc}
 
 %% Package options:
@@ -81,31 +84,29 @@ TACL-submission anonymization requirements)}
 \begin{document}
 \maketitle
 \begin{abstract}
-  This document attempted to tackle the authorship attribution problem across different languages. Focusing on Chinese and English, I have examined the possibilities of three attribution models, especially an aligned word embeddings model. The final result showed that even though it didn't surpass the other two models, there is possibility for the aligned embedding model to solve the cross-language authorship attribution problem.
+  This document attempted to tackle the authorship attribution (AA) problem across different languages. Focusing on Chinese and English, I have examined the possibilities of three attribution models, especially an aligned word embedding model. The final result showed that even though it didn't surpass the other two models, there is possibility for the aligned word embedding model to solve the cross-language authorship attribution (CLAA) problem.
 \end{abstract}
 
 \section{Introduction}
-In recent years, political propaganda has moved a significant amount of resources onto the social media in additional to the tranditional mass media, which has created both positive and negative effects in the crowd. Since then, there has been many researches on applying NLP techniques to counter-attack the manufactured information published on the social media. Most of them analyzed stylometric features on mono-language data and showed promising potential in this field such as \citet{rocha2016authorship}.
+In recent years, political propaganda has moved a significant amount of resources onto the social media in additional to the tranditional mass media. This has created both positive and negative influences to the crowd. Since then, there has been many attempts on applying NLP techniques to counter-attack the negative affect caused by manufactured information published on the social media. Most of them analyzed stylometric features on mono-language data and showed promising potential in this field \cite{rocha2016authorship}.
 
-In June 2019, the proposed anti-extradition law in Hong Kong had attracted great controversy on the social media. Political propoganda also had played a big role in this movement. In fact, it was so severe that Twitter had to suspend about 1000 twitter accounts violating their platform manipulation policies\footnote{\url{https://blog.twitter.com/en_us/topics/company/2019/information_operations_directed_at_Hong_Kong.html}}. A brief study by \citet{wood_mcminn_feng_2019} had revealed that the languages used in these tweets contents spaned across several languages (but mostly in Chinese and English), which proposed challenges for cross-langauge authorship attribution on short social media texts.
+In June 2019, the proposed anti-extradition law in Hong Kong had attracted great controversy on the social media. Political propoganda was so severe that Twitter had to suspend about 1000 twitter accounts violating their platform manipulation policies\footnote{\raggedright\url{https://blog.twitter.com/en_us/topics/company/2019/information_operations_directed_at_Hong_Kong.html}}. A brief study by \citet{wood_mcminn_feng_2019} had revealed that the languages used in these tweets contents spaned across several languages (but mostly in Chinese and English). As propoganda and manufactured information are now reaching out more people around the world by using multiple language, there is the need to develop AA techniques for cross-language social media texts. In this project, I have decided to try the possibilities for bilingual authorship attribution --- chosing English and Chinese as my experiment languages, by applying both machine translation and aligned word embedding models.
 
-Unlike the authorship attribution in English social network texts, cross-language authorship attribution has not been discovered extensively yet. However as propoganda now reaching out more people around the world by using multiple language, there is the need to develop authorship attribution techniques for cross-language social media texts. In this project, I have decided to try the possibilities for bilingual authorship attribution --- focuing on English and Chinese, by applying both machine translation and aligned word embeddings.
-
-The rest of the paper are structured in this way. Section \ref{sec:related-work} descirbes related works in cross-langauge authorship attribution and general authorship attribution problems. Section \ref{sec:method} explains how the dataset is built as well as the three model I have tried, while Section \ref{sec:results} showed and evaluated the corrsponding results. Finally in Section \ref{sec:conclusion} I summarizes the whole project and looked at possible futhre works for cross-language authorship attribution.
+The rest of the paper is structured as follows: Section \ref{sec:related-work} descirbes related works in general AA and CLAA problems. Section \ref{sec:method} explains how the dataset is built as well as the three models I have designed, while Section \ref{sec:results} showed and evaluated their corrsponding results. Finally in Section \ref{sec:conclusion} I summarized the whole project and looked at possible future works for CLAA.
 
 \section{Related Works}\label{sec:related-work}
 
-Compared to authorship attribution on monolingual languages, cross-language authorship attribution has not been explored so much. \citet{bogdanova2014cross} explored the possbility of applying machine translation to connect two languages, in combination of tranditional stylometric features such as word-level and char-level n-grams. But there are also researches attempted to tackle the problem without bridging different languages by their semantics at all, such as \citet{llorens2016deep} and \citet{sarwar2018scalable} who both analyzed low level language independent features.
+CLAA has less attention compared to AA on monolingual languages. \citet{bogdanova2014cross} explored the possbility of applying machine translation to connect two languages, in combination of tranditional stylometric features such as word-level and char-level n-grams. There are also researches attempted to tackle the problem without bridging different languages by their semantics at all, such as \citet{llorens2016deep} and \citet{sarwar2018scalable} who both analyzed low level language independent features.
 
-However, in all these previous works, the language used in their datasets are all Indo-European Lanuages. In my case, the relationship between Chinese and English are much further. There are research done for distant langauge pairs in cross-language plagiarm detection \cite{barron2010plagiarism}, but to my best knowledge no similar work for cross-lanauge authorship attribution has been released.
+However, in all of these previous works, the languages used in their datasets are all Indo-European Lanuages. In my case, the relationship between Chinese and English are much further than language pairs like Spanish and English. There are research done for distant langauge pairs in cross-language plagiarm detection \cite{barron2010plagiarism}, but to my best knowledge no similar work for CLAA has been released.
 
-Besides datasets, most authorship attribution tasks employed machine learning techniques as the classification algorithm, while there are few examples successfully applied neural networks to the same problem \cite{shrestha2017convolutional}. This is reasonable as monolingual authorship attribution usually catches the quirkiness of spelling, spacing, word richness of a specific writer. While in cross-language authorship attribution, especially for distant language pairs, there might be no directly comparable features betwenn languages. For example in Chinese and English, it is impossible to compare the pattern of misspealling and spacing in Chinese because of the unique writing system in Chinese. Therefore we might need to go back to the semantic level to look for similarities across different writings to find out if they came from the same author.
+Besides datasets, most AA tasks employed machine learning techniques as the classification algorithm, while there are few examples successfully applied Neural Networks to the same problem \cite{shrestha2017convolutional}. This is reasonable as monolingual AA usually catches the quirkiness of spelling, spacing or word richness of a specific writer. While in CLAA, especially for distant language pairs, there might be no directly comparable features betwenn languages. For example in Chinese and English, it is impossible to compare the pattern of misspelling and spacing because they are not existed in Chinese. Therefore we might need to go back to the semantic level to look for similarities between texts to find out if they came from the same author.
 
 \section{Methodology}\label{sec:method}
 
 \subsection{Dataset}
 
-To my best knowledge there is currently no publicly available corpus focused in social media texts in both English and Chinese, hence I have decided to build my own using Twitter Public API.
+Since there is currently no publicly available corpus focused in social media texts in both English and Chinese, I have built my own using Twitter Public API.
 
 \begin{CJK*}{UTF8}{gbsn}
 
@@ -120,34 +121,35 @@ To my best knowledge there is currently no publicly available corpus focused in 
   \hline
   \end{tabular}
   \end{center}
-  \caption{\label{tab:query-func-words-table} Function words used in the query string}
+  \caption{\label{tab:query-func-words-table} Function Words Used in the Query String}
 \end{table}
 
-The first step is to build a query string to collect as many tweets in either English or Chinese as possible. I selected several frequent function words in Chinese and their English counter parts, as shown in Table \ref{tab:query-func-words-table}.  Let's say $C=\{c_1, c_2, c_3, \cdots, c_i\}$ is a group of Chinese function words and $E=\{e_1, e_2, e_3, \cdots, e_j\}$ is their English siblings, the query string $Q$ would be union set over the Cartesian product $C\times E$.
+The first step is to build a query string to collect as many tweets in either English or Chinese as possible. I selected several most frequent function words in Chinese and their English counter parts, which are listed in Table \ref{tab:query-func-words-table}. Suppose $C=\{c_1, c_2, c_3, \cdots, c_i\}$ is a group of Chinese function words and $E=\{e_1, e_2, e_3, \cdots, e_j\}$ is the corrsponding English function words, the query string $Q$ would be union set over the Cartesian product $C\times E$.
 
 \begin{equation}
   Q=\bigcup_{k=1}s_k, s_k \in C \times E
 \end{equation}
 
-For example if we select the first row in the table, then our Chinese cadidate function word is ``是'' while the English candidates are ``am'', ``is'' and ``are''. Our query string would be \verb|(是 am) OR (是 is) OR (是 are)|.
-
+So if we select the first row in Table \ref{tab:query-func-words-table}, then our Chinese cadidate function word candidate would be ``是'' while the English candidates are ``am'', ``is'' and ``are''. The final query string would be \begin{verbatim}
+  (是 am) OR (是 is) OR (是 are)
+\end{verbatim}
 \end{CJK*}
 
-The next step is to fine grain all of the possible twitter users from the previous step. Here I define two bilingual ratio values --- let $L_1$ and $L_2$ denote two sets of the tweets in any of the two language written by a user, $T$ as the set of all of his/her tweets, then we have $R_{inner}$ as the ratio between these two tweets languages.
+The next step is to fine grain all of the possible twitter users from the previous step. Here I define two bilingual ratio values --- let $t_1$ and $t_2$ denote two sets of the tweets in any of the two language written by a user, $T$ is the set of all of his/her tweets. Then we have $R_i$ as the ratio between these two tweets languages.
 
 \begin{equation}
-  R_{inner} = \frac{\min(|L_1|, |L_2|)}{\max(|L_1|, |L_2|)}
+  R_i = \frac{\min(|t_1|, |t_2|)}{\max(|t_1|, |t_2|)}
 \end{equation}
 
-And $R_{overall}$ as the ratio between the bilingual content and the total tweets.
+And $R_T$ as the ratio between the bilingual content and the total tweets.
 
 \begin{equation}
-  R_{overall} = \frac{|L_1|+|L_2|}{\text{|T|}}
+  R_T = \frac{|t_1|+|t_2|}{\text{|T|}}
 \end{equation}
 
-For each user, I crawled his or her first 200 tweets from his timeline (exclude retweets) and set the threshold at $R_{inner} \ge 0.5$ and $R_{overall} \ge 0.8$. In this way I could filter out two kinds of users --- someone who occasionally tweets in another language than his/her main language, and someone who tweets in all kinds of languages.
+For each user, I crawled his or her first 200 tweets from his or her timeline (exclude retweets). The threshold were set at $R_i \ge 0.5$ and $R_T \ge 0.8$. In this way I could filter out two kinds of users --- someone who occasionally tweets in another language than his/her main language, and someone who tweets in all kinds of languages.
 
-After these two steps I have selected 52 valid bilingual twitter accounts. Two of them are obviously non-personnal users so I have removed them from the list, which made the length of the final list of bilingual twitter users to 50. From them I crawled all of their tweets and applied cleaning to these data (including removing URLs, hashtags, mentions, reserved words, emojis and smileys). The CNN classifier cannot take tweets that are shorter then 5 words so I have also segmented both English and Chinese tweets and removed those that are not longer than 5 segments. In the end, I have obtained 69710 tweets that are detailed in Table \ref{tab:overlook-dataset-table} and \ref{tab:dist-dataset-table}. Also, each model is evaluated by 10-fold cross validation, except for the aligned word embeddings model which was trained and validated in fixed training and validataion dataset derived from the full dataset by a ratio of 0.6, 0.1 and 0.3.
+After searching and fine graining I have selected 52 valid bilingual twitter accounts. Two of them are non-personal accounts so I have removed them from the list, which shortened the length of the final list of bilingual twitter users to 50. From them I crawled all of their tweets and applied cleaning to these data, including removing URLs, hashtags, mentions, reserved words, emojis and smileys. The CNN classifier cannot take tweets that are shorter then 5 words so I have also segmented both English and Chinese tweets and removed those that are shorter than 5 segments. In the end, I have obtained 69710 tweets that are detailed in Table \ref{tab:overlook-dataset-table} and \ref{tab:dist-dataset-table}. Also, each model is evaluated by 10-fold cross validation, except for the aligned word embedding model which was trained and validated in a fixed training and validataion dataset derived from the full dataset by the ratio of 0.6, 0.1 and 0.3.
 
 \begin{table}[t]
   \begin{center}
@@ -159,7 +161,7 @@ After these two steps I have selected 52 valid bilingual twitter accounts. Two o
   \hline
   \end{tabular}
   \end{center}
-  \caption{\label{tab:overlook-dataset-table} Overall look at the Dataset}
+  \caption{\label{tab:overlook-dataset-table} Overlook at the Dataset}
 \end{table}
 
 \begin{table*}[t]
@@ -181,23 +183,23 @@ After these two steps I have selected 52 valid bilingual twitter accounts. Two o
 
 \subsection{Vanilla Model}
 
-As \citet{rocha2016authorship} had showned in their work, the best stylometric features for authorship attribution on social media text are word-level and char-level n-grams. I have designed a vanilla attribution model with word-level 1, 2, 3-grams and char-level 1, 2, 3-grams, which is then feeded into a logistic regression classifier and a LIBLINEAR\cite{REF08a} SVM classifier implemented by Scikit-learn \cite{scikit-learn}. The word-level and char-level features are calculated from all available tweets without distinguishing the language. I have also transformed all of the appearance counts to TF-IDF values to deminish the effect of trending words.
+As \citet{rocha2016authorship} had showned in their work, the best stylometric features for AA on social media text are word-level and char-level n-grams. I have designed a vanilla attribution model with word-level 1, 2, 3-grams and char-level 1, 2, 3-grams, which were then feeded into a logistic regression classifier and a LIBLINEAR SVM classifier \cite{REF08a} implemented by Scikit-learn \cite{scikit-learn}. The word-level and char-level features were counted from all available tweets without distinguishing the language by their appearance and tranformed into TF-IDF values.
 
-We have seen from Table \ref{tab:dist-dataset-table} that the number of tweets from each user is highly unbalanced. The most frequent user tweets 40 times more than the most quiet user. So I have set both of the logistic regression and LIBLINEAR SVM to balance out the dataset automatically by assigning more weight to minor classes (users).
+We have seen from Table \ref{tab:dist-dataset-table} that the number of tweets from each user is highly unbalanced. The most frequent user tweets 40 times more than the most quiet user. So I have set both of the logistic regression and SVM classifier to balance out the dataset automatically by assigning more weight to minor classes (users).
 
 \subsection{Machine Translation Model}
 
-Inspired by \citet{bogdanova2014cross} I have adapted to tackle the cross-langauge authorship attribution problem is by using machine translation. I have used the Translator Text API from Microsoft Azure Cognitive Services, manully specifying the source language and the target langauge. The state-of-art machine translation service is far from perfect and underperforms on social media text than formal writings. In order words it will inevitably introduce ``distortion'' to the raw tweet and worsen the result in theory, I still argue that machine translation is one of the cheapest and the most intuitive solution to multi-language tasks in NLP.
+I have also adapted machine translation followed by \citet{bogdanova2014cross} to tackle the CLAA problem. I have used the Translator Text API from Microsoft Azure Cognitive Services, manully specifying the source language and the target langauge. One thing to note is that even the state-of-art machine translation service is far from perfect and underperforms on social media texts than formal writings. In other words it will inevitably introduce ``distortion'' to the raw tweets and worsen the result in theory, though machine translation is one of the most intuitive solution to this multi-language task.
 
-In this second authorship attribution model, I have extracted and divided the raw tweets into the English group and the Chinese group. For tweets that mix both languages I seperated them into these two monolingual groups. Then tweets in each language group will be machine translated into the other language before being feeded into the aforementioned logistic regression and SVM classifier, together with other translated tweets within the same group.
+In this second model, I have extracted and divided the raw tweets into the English group and the Chinese group. For tweets that mix both languages I seperated them into these two monolingual groups. Then tweets in each language group will be machine translated into the other language before being feeded into the aforementioned logistic regression and SVM classifier, together to be classified among other translated tweets within the same language group.
 
-\subsection{Aligned Word Embeddings Model}
+\subsection{Aligned Word Embedding Model}
 
-The last model I have applied is a Convolutional Neural Network classifier inspired by \citet{shrestha2017convolutional}. They have proposed an architecture using char n-gram models as the single embedding layer to deal with tweets classification. But since my task is to explore the classification problem between two languages, I have switched to the aligned fastText word embeddings \cite{bojanowski2017enriching} \cite{joulin2018loss} as my embedding layer.
+The last model I have applied is a Convolutional Neural Network classifier inspired by \citet{shrestha2017convolutional}. They have proposed an architecture using char n-grams models as the single embedding layer to deal with tweets classification. But since my task is to explore the classification problem between two languages, I have switched to the aligned fastText word embeddings \cite{bojanowski2017enriching} \cite{joulin2018loss} as my embedding layer.
 
 In the aligned fastText word embeddings, each word is represented by a 300 dimension vector. I concatenated two embeddings to form a bunch of 600 dimension word embeddings for the possible bilingual vocabularies, padded them and send them to the next layer. Each OOV words are marked as \verb|<UNK>| and are giving an embedding of zeros.
 
-The CNN network also has four convolutional layers, each of them has 100 kernels sizing from 2, 3, 4 or 5. They are designed to catch the information hidden inside the word bigram. trigram and quadgrams before being max-pooled. I have adapted Adam optimizer \cite{kingma2014adam} and all of the hyperparams are shown in Table \ref{tab:cnn-hyperparams-table}.
+The CNN network also has four convolutional layers, each of them has 100 kernels sizing from 2, 3, 4 or 5. They are designed to catch the information hidden inside the word bigram. trigram and quadgrams before being max-pooled. I have also used Adam optimizer \cite{kingma2014adam} and all of the hyperparameters are listed in Table \ref{tab:cnn-hyperparams-table}.
 
 \begin{table}[t]
   \begin{center}
@@ -216,7 +218,7 @@ The CNN network also has four convolutional layers, each of them has 100 kernels
   \hline
   \end{tabular}
   \end{center}
-  \caption{\label{tab:cnn-hyperparams-table} Hyperparameter settings in the Aligned Word Embeddings model}
+  \caption{\label{tab:cnn-hyperparams-table} Hyperparameter settings in the Aligned Word Embedding model}
 \end{table}
 
 \section{Results}\label{sec:results}
@@ -225,29 +227,31 @@ The CNN network also has four convolutional layers, each of them has 100 kernels
 
 \begin{table*}[t]
   \begin{center}
+  \begin{adjustbox}{width={\textwidth},totalheight={\textheight},keepaspectratio}%
   \begin{tabular}{|l|r|r|r|r|r|r|}
   \hline & \bf LR & \bf SVM & \bf LR+MT(EN) & \bf SVM+MT(EN) & \bf LR+MT(ZH) & \bf SVM+MT(ZH) \\ \hline
-  Word 1-gram & 0.659 & 0.714 & 0.533 (-19.1\%) & 0.553 (-22.5\%) & 0.614 (-6.8\%) & 0.642 (-10.1\%) \\
-  \hspace{0.5cm} 2-gram & 0.648 & 0.744 & 0.543 (-16.2\%) & 0.602 (-19.1\%) & 0.612 (-5.6\%) & 0.68 (-8.6\%) \\
-  \hspace{0.5cm} 3-gram & 0.62 & 0.733 & 0.523 (-15.6\%) & 0.599 (-18.3\%) & 0.595 (-4\%) & 0.673 (-8.2\%) \\
-  Char 1-gram & 0.452 & 0.45 & 0.216 (-52.2\%) & 0.197 (-56.2\%) & 0.575 (+27.2\%) & 0.583 (+29.6\%) \\
-  \hspace{0.5cm} 2-gram & 0.592 & 0.655 & 0.415 (-29.9\%) & 0.433 (-33.9\%) & 0.622 (+5.1\%) & 0.68 (+3.8\%) \\
-  \hspace{0.5cm} 3-gram & 0.637 & 0.723 & 0.5 (-21.5\%) & 0.555 (-23.2\%) & 0.615 (-3.5\%) & 0.682 (-5.7\%) \\
+  Word 1-gram & 0.659 & 0.714 & 0.533 \textcolor{gray}{(-19.1\%)} & 0.553 \textcolor{gray}{(-22.5\%)} & 0.614 \textcolor{gray}{(-6.8\%)} & 0.642 \textcolor{gray}{(-10.1\%)} \\
+  \hspace{0.5cm} 2-gram & 0.648 & 0.744 & 0.543 \textcolor{gray}{(-16.2\%)} & 0.602 \textcolor{gray}{(-19.1\%)} & 0.612 \textcolor{gray}{(-5.6\%)} & 0.680 \textcolor{gray}{(-8.6\%)} \\
+  \hspace{0.5cm} 3-gram & 0.620 & 0.733 & 0.523 \textcolor{gray}{(-15.6\%)} & 0.599 \textcolor{gray}{(-18.3\%)} & 0.595 \textcolor{gray}{(-4.0\%)} & 0.673 \textcolor{gray}{(-8.2\%)} \\
+  Char 1-gram & 0.452 & 0.450 & 0.216 \textcolor{gray}{(-52.2\%)} & 0.197 \textcolor{gray}{(-56.2\%)} & 0.575 \textcolor{gray}{(+27.2\%)} & 0.583 \textcolor{gray}{(+29.6\%)} \\
+  \hspace{0.5cm} 2-gram & 0.592 & 0.655 & 0.415 \textcolor{gray}{(-29.9\%)} & 0.433 \textcolor{gray}{(-33.9\%)} & 0.622 \textcolor{gray}{(+5.1\%)} & 0.680 \textcolor{gray}{(+3.8\%)} \\
+  \hspace{0.5cm} 3-gram & 0.637 & 0.723 & 0.500 \textcolor{gray}{(-21.5\%)} & 0.555 \textcolor{gray}{(-23.2\%)} & 0.615 \textcolor{gray}{(-3.5\%)} & 0.682 \textcolor{gray}{(-5.7\%)} \\
   \hline
   \end{tabular}
+\end{adjustbox}
   \end{center}
   \caption{\label{tab:stylo-feature-results-table} Results for the Vanilla Model and the Machine Translation Model}
 \end{table*}
 
-For the first two models I have applied grid search to find the best stylometric feature for biligual authorship attribution. As shown in Table \ref{tab:stylo-feature-results-table}, the best feature are usually the shorter word unigrams or bigrams for each classifier. Only in the translated Chinese group the best results appeared in the char-level bigrams and trigrams. But this can be explained by the fact that in Chinese the average word length is about one to two characters while in English it is about four to five letters.  \cite{chen2015does} \cite{bochkarev2015average}. In other words, Chinese characters them alone can carry as much information as English words. The result that word-level n-grams are more effective than char-level is inline with results from other previous work in many other authorship attribution tasks \cite{kestemont2018overview} \cite{rangel2019overview}.
+For the first two models I have applied grid search to find the best stylometric feature for bilingual AA. As we see in Table \ref{tab:stylo-feature-results-table}, the best features are usually the shorter word unigrams or bigrams for each classifier. Only in the translated Chinese group the best results appeared in the char-level bigrams and trigrams. But this can be explained by the fact that in Chinese the average word length is about one to two characters while in English it is about four to five letters.  \cite{chen2015does} \cite{bochkarev2015average}. In other words, Chinese characters them alone can carry as much information as English words. The result that word-level n-grams are more effective than char-level is aligned with results from many previous works in many other AA tasks \cite{kestemont2018overview} \cite{rangel2019overview}.
 
-Also the SVM classifier outperformed the logistic regression classifier in nearly all comparisions, except in the char-level unigram one. This can be seen in \citet{rocha2016authorship}'s work as well as they attributed it to the application of Maxiumn Margin Princple in SVM classifiers. However for authorship attribution task on long articles, logistic regression could be better than SVM \cite{bogdanova2014cross}. Thus I think SVM is better suited for short social media texts than logistic regression.
+Also the SVM classifier outperformed the logistic regression classifier in nearly all comparisions, except in the char-level unigram one. This can be seen in \citet{rocha2016authorship}'s work as well. They attributed it to the application of Maxiumn Margin Princple in SVM classifiers. However for AA task on long articles, logistic regression could be better than SVM \cite{bogdanova2014cross}. Thus I think SVM is a better choice for short social media texts than logistic regression.
 
 \subsection{Distortion from Machine Translation}
 
-As mentioned previously, machine translation will inevitably introduction noise into the text and will bring down the accuracy. In Table \ref{tab:stylo-feature-results-table} I have also calculated the impact of machine translation compared to the untranslated original text. Word-level bigrams has topped the chart in almost every group, followed closely by word-level trigrams and unigrams, which once again showed that word-level n-grams are better features than char-level n-grams in our bilingual tweet dataset. Further more, LIBLINEAR SVM classifier still achieved higher accuracy than logistic regression classifier after machine translation, showed that it is more suitable for short social media text no matter what language the text is in.
+As mentioned previously, machine translation will inevitably introduction noise into the text and will bring down the accuracy. In Table \ref{tab:stylo-feature-results-table} I have also calculated the impact of machine translation compared to the untranslated original text. Word-level bigrams have topped the chart in almost every group, followed closely by word-level trigrams and unigrams. The result once again showed that word-level n-grams are better features than char-level n-grams in our bilingual tweet dataset. Further more, LIBLINEAR SVM classifier still achieved higher accuracy than the logistic regression classifier after machine translation, showed that it is more suitable for short social media text no matter what language the text is in.
 
-Move on to the performance difference between translated Chinese and English texts, we can see that Chinese suffered more than English if it been translated. Especially in the case of char 1-gram, when all Chinese text are translated into English the performance dropped more than 50\%. In contrast while we turn all English content into Chinese, we have manageed to improve the performance by nearly 30\%. Since many Chinese characters can serve as a word alone, short char-level n-grams in Chinese can be viewed as word-level n-grams in English. Thus explains why we had a large gain on performance when we translate everything into Chinese.
+Move on to the performance difference between translated Chinese and English texts, we can see that Chinese suffered more than English if it been translated. Especially in the case of char 1-gram, when all Chinese text are translated into English the performance dropped more than 50\%. In contrast while we turned all English content into Chinese, we have manageed to improve the performance by nearly 30\%. Since many Chinese characters can serve as a word alone, short char-level n-grams in Chinese can be viewed as word-level n-grams in English. Thus explains why we had a large gain on performance when we translate everything into Chinese.
 
 \subsection{Aligned Word Embeddings}
 
@@ -255,27 +259,27 @@ Move on to the performance difference between translated Chinese and English tex
   \begin{center}
   \begin{tabular}{|l|r|r|}
   \hline \bf Word Embeddings & \bf Accuracy & \bf Loss \\ \hline
-  Aligned Bilingual & 70.06\% & 1.197 \\
-  \hspace{0.5cm} ZH Only & 68\% & 1.242 \\
-  \hspace{0.5cm} EN Only & 68.99\% & 1.195 \\
-  Unaligned Bilingual & 64.76\% & 1.816 \\
+  Aligned Bilingual & 70.1\% & 1.197 \\
+  \hspace{0.5cm} ZH Only & 68.0\% & 1.242 \\
+  \hspace{0.5cm} EN Only & 69.0\% & 1.195 \\
+  Unaligned Bilingual & 64.8\% & 1.816 \\
   \hline
   \end{tabular}
   \end{center}
-  \caption{\label{tab:cnn-results-table} Results for the Aligned Word Embeddings Model}
+  \caption{\label{tab:cnn-results-table} Results for the Aligned Word Embedding Model}
 \end{table}
 
-Finally the results for the aligned word embeddings model are shown in Table \ref{tab:cnn-results-table}. Because fastText only provides word embeddings for Tranditional Chinese I have used OpenCC\footnote{\url{https://github.com/BYVoid/OpenCC}} to convert all the Simplified Chinese content to Tranditional Chinese. Furthermore I have also added a reference group using the unaligned common fastText embeddings. Both the aligned and the unaligned word embeddings for Chinese and English were pre-trained on Wikipedia text \cite{bojanowski2017enriching}.
+Finally the results for the aligned word embedding model are shown in Table \ref{tab:cnn-results-table}. Because fastText only provides word embeddings for Tranditional Chinese, I have used OpenCC\footnote{\url{https://github.com/BYVoid/OpenCC}} to convert all the Simplified Chinese content to Tranditional Chinese. Furthermore I have also added a reference group using the unaligned common fastText embeddings. Both the aligned and the unaligned word embeddings for Chinese and English were pre-trained on Wikipedia text \cite{bojanowski2017enriching}.
 
-The aligned word embeddings model didn't surpass my vanilla model, however it is much closer to it than the machine translation model. Also the performance gain by using bilingual embeddings was subtle compared to monolingual embeddings, only around 2\%. The unaligned model performed worst among these three kinds of embeddings, which is expected.
+The aligned word embedding model didn't surpass my vanilla model, however it is much closer to it than the machine translation model. Also the performance gain by using bilingual embeddings was subtle compared to monolingual embeddings, only around 2\%. The unaligned model performed worst among these three kinds of embeddings, which is expected.
 
-The result for the aligned word embeddings model might suggest a better combination for bilingual word embeddings rather than concatenation. But there are other facts that could also affect the final result. First, the fastText word embeddings were trained on a domian that is far away from social media text. Wikipedia is more formal, serious and comprehensive place than Twitter, and the topics it includes had little intersection with the topic from Tiwtter. The results could be improved by training a dedicated word embeddings from Twitter corpus. Another things to note is the imbalance between English and Chinese word embedding sizes. The English embeddings has 2519370 items and is 7.5 times larger than the Chinese embeddings, just as the English Wikipedia articles are around 5 times more than articles in Chinese \footnote{As Dec 2018, \url{https://stats.wikimedia.org/EN/TablesWikipediaEN.htm}} \footnote{As Dec 2018, \url{https://stats.wikimedia.org/EN/TablesWikipediaZH.htm}}. Smaller embeddings size will introduce more OOV words and will lower the overall accuracy.
+The result for the aligned word embedding model might suggest a better combination for bilingual word embeddings rather than concatenation. But there are other facts that could also affect the final result. First, the fastText word embeddings were trained on a domian that is far away from social media text. Wikipedia is more formal, serious and comprehensive place than Twitter, and the topics it includes had little intersection with the topics from Tiwtter. The results could be improved by training a dedicated word embeddings from Twitter corpus. Another things to note is the imbalance between English and Chinese word embedding sizes. The English embeddings has 2519370 items and is 7.5 times larger than the Chinese embeddings, just as the English Wikipedia articles are around 5 times more than articles in Chinese \footnote{As Dec 2018, \url{https://stats.wikimedia.org/EN/TablesWikipediaEN.htm}} \footnote{As Dec 2018, \url{https://stats.wikimedia.org/EN/TablesWikipediaZH.htm}}. Smaller embeddings size will introduce more OOV words and will lower the overall accuracy.
 
 \section{Conclusion}\label{sec:conclusion}
 
-In this project I have explored the possibilities of three different model for a bilingual authorship attribution question. On a dataset collected from Twitter, the simple SVM classifier with word-level and char-level n-grams achieved the highest accuracy, followed by the aligned word embeddings model. Moreover I have also discussed the distortion brought by machine translation. It turned out that even though the aligned word embeddings didn't give the best result, it has the potential to be one of the solutions to the cross-lanaguage authorship attribution problem as well.
+In this project I have explored the possibilities of three different model for a bilingual AA question. On a dataset collected from Twitter, the simple SVM classifier with word-level and char-level n-grams achieved the highest accuracy, followed by the aligned word embedding model. I have also discussed the distortion brought by machine translation. It turned out that even though the aligned word embeddings didn't give the best result, it has the potential to be one of the solutions to the CLAA problem as well.
 
-In futher works, the emphisis should be on a more sophiscated assembling of bilignual word embeddings. Also, world clusters is another promising way to transfer from one languages to another. Either of them avoids the inevitable distortion from machine translation, hence can be the new features for cross-language authorship attribution.
+In futher works, the emphisis should be on a more sophiscated assembling of bilignual word embeddings. In addition, world clusters \cite{tackstrom2012cross} is another promising model to transfer from one languages to another. Either of them avoids the inevitable distortion from machine translation, hence can be the new features for CLAA.
 
 \bibliography{report}
 \bibliographystyle{acl_natbib}
